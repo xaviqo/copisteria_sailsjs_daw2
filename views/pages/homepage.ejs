@@ -1,0 +1,72 @@
+<main style="display: grid; grid-template-rows: 0.5fr 4fr">
+    <div style="width: 70vw; display: grid; grid-template-rows: 1fr 3fr 1fr">
+        <div style="display: flex; justify-content: center">
+            <select class="form-control" name="printer" id="printer">
+                <option value="1">Impresora Básica</option>
+                <option value="2">Impresora Moderna</option>
+                <option value="3">Impresora Industrial</option>
+            </select>
+        </div>
+        <div style="display: flex; justify-content: center">
+            <textarea name="content" id="content" cols="30" rows="10"></textarea>
+        </div>
+        <div style="display: flex; justify-content: center">
+            <input type="button" value="Enviar" id="send-queue">
+        </div>
+    </div>
+    <div style="width: 70vw; display: grid; grid-template-columns: repeat(3,1fr); margin-top: 40px">
+        <% for (const printer of printers) { %>
+            <div style="display: grid; grid-template-rows: 1fr 5fr">
+                <div>
+                    <div>
+                        <a href="/print/<%= printer.id %>">
+                            <img src="<%= sails.config.custom.baseUrl %>/images/<%= printer.id %>.png" >
+                        </a>
+                    </div>
+                    <div>
+                        <div style="padding: 20px; background-color: black; color: white">
+                            <%= printer.black %>%
+                        </div>
+                        <div style="padding: 20px; background-color: #FFFF00">
+                            <%= printer.yellow %>%
+                        </div>
+                        <div style="padding: 20px; background-color: #00FFFF">
+                            <%= printer.cyan %>%
+                        </div>
+                        <div style="padding: 20px; background-color: #FF00FF">
+                            <%= printer.magenta %>%
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <% for (const q of queue) { %>
+                        <% if (q.printer === printer.id) {%>
+                            <div>
+                                <%= q.content %>
+                            </div>
+                        <% } %>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</main>
+<script>
+    window.onload = () => {
+      document.getElementById('send-queue').onclick = () => {
+        fetch('/queue', {
+          method: 'POST',
+          body: JSON.stringify({
+            printer: document.getElementById('printer').value,
+            content: document.getElementById('content').value
+          })
+        })
+          .then( r => r.json() )
+          .then( d => {
+            if (d == 'OK') {
+              location.reload()
+            }
+          })
+      }
+    }
+</script>
